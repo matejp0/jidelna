@@ -7,7 +7,7 @@ import (
 func main() {
   var user api.User
   user.Login(EMAIL, PASSWORD)
-  user.GetFoods()
+  user.GetFoods(10)
 
     
  // fmt.Println(user.GetUserInfo())

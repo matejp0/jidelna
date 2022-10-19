@@ -75,9 +75,9 @@ func (u *User) Login(email, password string) () {
   u.userId = n
 }
 
-func (u *User) GetFoods() {
+func (u *User) GetFoods(days int) {
   t := time.Now()
-  req, _ := http.NewRequest(http.MethodGet, URL+"zarizeni/356/dny/od/" + t.Format("2006-01-02") + "/do/" + t.AddDate(0, 0, 2).Format("2006-01-02"), nil)
+  req, _ := http.NewRequest(http.MethodGet, URL+"zarizeni/356/dny/od/" + t.Format("2006-01-02") + "/do/" + t.AddDate(0, 0, days).Format("2006-01-02"), nil)
 
   resp, err := u.client.Do(req)
 
@@ -104,15 +104,19 @@ func (u *User) GetFoods() {
 
 func PrintFoods(days []Day, u *User) {
   d := color.New(color.FgCyan, color.Bold)
+  dateColor := color.New(color.FgMagenta, color.Italic)
   for _, day := range days {
-    fmt.Println(day.Date)
+    date, _ := time.Parse("2006-01-02", day.Date)
+
+    dateColor.Println(date.Format("01. 02. 2006"))
     
     ucet := day.Den.CastiDne[0].Objednavky[u.userId].(map[string]any)
-    idMenu := ucet["idMenu"]
     for _, item := range day.Den.CastiDne[0].Menu {
       if item.LzeObjednat == false { continue }
-      if strconv.Itoa(item.Id) == idMenu {
+      if strconv.Itoa(item.Id) == ucet["idMenu"] && ucet["stav"] == "Prihlaseno" {
         d = color.New(color.FgHiYellow, color.Bold)
+      } else if ucet["stav"] == "Vyzvednuto"{
+        d = color.New(color.FgHiRed)
       } else {
         d = color.New(color.FgHiWhite)
       }

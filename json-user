@@ -1,0 +1,25 @@
+{
+  "stav": "ok",
+  "tag": "login_success",
+  "zprava": "Uživatel úspěšně přihlášen",
+  "ucet": {
+    "typ": "master",
+    "login": "prerovskym@gvp.cz",
+    "generovaneHeslo": false,
+    "ucty": {
+      "3493043": {
+        "id": 3493043,
+        "regc": "356",
+        "login": "35602086",
+        "generovaneHeslo": false,
+        "vyzvedavaNaWebu": true,
+        "maxPocetPorci": 1,
+        "blokovatWeb": false,
+        "anonymizovaneOU": false,
+        "debetDnu": 0,
+        "debetKc": 0,
+        "kontoProObjednavani": "216.0000"
+      }
+    }
+  }
+}

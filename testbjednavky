@@ -1,0 +1,362 @@
+[
+  {
+    "datum": "2022-10-19",
+    "den": {
+      "castiDne": [
+        {
+          "objednavky": {
+            "3493043": {
+              "idUzivatele": 3493043,
+              "idMenu": "10815",
+              "stav": "Prihlaseno",
+              "mnozstvi": 1,
+              "odebral": 0,
+              "odeslana": true,
+              "potvrzena": true,
+              "zdroj": "Jidelna",
+              "hodnoceno": 0,
+              "smiOhodnotit": false
+            }
+          },
+          "nazev": "Oběd",
+          "menu": [
+            {
+              "nazev": "2",
+              "id": 10816,
+              "lzeObjednat": true,
+              "cenyVahy": [
+                {
+                  "id": 3493043,
+                  "cena": "40.00",
+                  "hmotnost": null
+                }
+              ],
+              "chody": [
+                {
+                  "nazev": "Polévka",
+                  "jidlo": "Slepičí vývar",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "9"
+                  ]
+                },
+                {
+                  "nazev": "Jídlo",
+                  "jidlo": "Pažitkové špagety s ricottou a oříšky",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "7",
+                    "8",
+                    "9"
+                  ]
+                },
+                {
+                  "nazev": "Doplněk",
+                  "jidlo": "Nabídka salátového baru",
+                  "alergeny": []
+                },
+                {
+                  "nazev": "Nápoj",
+                  "jidlo": "džus",
+                  "alergeny": []
+                }
+              ]
+            },
+            {
+              "nazev": "3",
+              "id": 10817,
+              "lzeObjednat": true,
+              "cenyVahy": [
+                {
+                  "id": 3493043,
+                  "cena": "40.00",
+                  "hmotnost": null
+                }
+              ],
+              "chody": [
+                {
+                  "nazev": "Polévka",
+                  "jidlo": "Slepičí vývar",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "9"
+                  ]
+                },
+                {
+                  "nazev": "Jídlo",
+                  "jidlo": "Čočkový salát se žampióny",
+                  "alergeny": [
+                    "9"
+                  ]
+                },
+                {
+                  "nazev": "Doplněk",
+                  "jidlo": "Nabídka salátového baru",
+                  "alergeny": []
+                },
+                {
+                  "nazev": "Nápoj",
+                  "jidlo": "džus",
+                  "alergeny": []
+                }
+              ]
+            }
+          ],
+          "od": "12:00",
+          "do": "14:30"
+        }
+      ]
+    }
+  },
+  {
+    "datum": "2022-10-20",
+    "den": {
+      "castiDne": [
+        {
+          "objednavky": {
+            "3493043": {
+              "idUzivatele": 3493043,
+              "idMenu": "10815",
+              "stav": "Prihlaseno",
+              "mnozstvi": 1,
+              "odebral": 0,
+              "odeslana": true,
+              "potvrzena": true,
+              "zdroj": "Jidelna",
+              "hodnoceno": 0,
+              "smiOhodnotit": false
+            }
+          },
+          "nazev": "Oběd",
+          "menu": [
+            {
+              "nazev": "1",
+              "id": 10815,
+              "lzeObjednat": true,
+              "cenyVahy": [
+                {
+                  "id": 3493043,
+                  "cena": "40.00",
+                  "hmotnost": null
+                }
+              ],
+              "dataHodnoceni": {
+                "potrebaHlasu": 8
+              },
+              "chody": [
+                {
+                  "nazev": "Polévka",
+                  "jidlo": "Česneková",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "9"
+                  ],
+                  "hodnoceni": {
+                    "Česneková": {
+                      "pocetHlasu": 47,
+                      "sumaHodnoceni": 162
+                    }
+                  }
+                },
+                {
+                  "nazev": "Jídlo",
+                  "jidlo": "Lasagne s vepřovým masem",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "6",
+                    "7",
+                    "9"
+                  ],
+                  "hodnoceni": {
+                    "Lasagne s vepřovým masem": {
+                      "pocetHlasu": 21,
+                      "sumaHodnoceni": 77
+                    }
+                  }
+                },
+                {
+                  "nazev": "Doplněk",
+                  "jidlo": "Nabídka salátového baru",
+                  "alergeny": [],
+                  "hodnoceni": {
+                    "Nabídka salátového baru": {
+                      "pocetHlasu": 517,
+                      "sumaHodnoceni": 1822
+                    }
+                  }
+                },
+                {
+                  "nazev": "Nápoj",
+                  "jidlo": "džus",
+                  "alergeny": [],
+                  "hodnoceni": {
+                    "džus": {
+                      "pocetHlasu": 1683,
+                      "sumaHodnoceni": 5836
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "nazev": "2",
+              "id": 10816,
+              "lzeObjednat": true,
+              "cenyVahy": [
+                {
+                  "id": 3493043,
+                  "cena": "40.00",
+                  "hmotnost": null
+                }
+              ],
+              "dataHodnoceni": {
+                "potrebaHlasu": 8
+              },
+              "chody": [
+                {
+                  "nazev": "Polévka",
+                  "jidlo": "Česneková",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "9"
+                  ],
+                  "hodnoceni": {
+                    "Česneková": {
+                      "pocetHlasu": 47,
+                      "sumaHodnoceni": 162
+                    }
+                  }
+                },
+                {
+                  "nazev": "Jídlo",
+                  "jidlo": "Bramborový guláš",
+                  "alergeny": [
+                    "1",
+                    "9"
+                  ],
+                  "hodnoceni": {
+                    "Bramborový guláš": {
+                      "pocetHlasu": 4
+                    }
+                  }
+                },
+                {
+                  "nazev": "Příloha",
+                  "jidlo": "chléb",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "7"
+                  ],
+                  "hodnoceni": {
+                    "chléb": {
+                      "pocetHlasu": 14,
+                      "sumaHodnoceni": 48
+                    }
+                  }
+                },
+                {
+                  "nazev": "Doplněk",
+                  "jidlo": "Nabídka salátového baru",
+                  "alergeny": [],
+                  "hodnoceni": {
+                    "Nabídka salátového baru": {
+                      "pocetHlasu": 517,
+                      "sumaHodnoceni": 1822
+                    }
+                  }
+                },
+                {
+                  "nazev": "Nápoj",
+                  "jidlo": "džus",
+                  "alergeny": [],
+                  "hodnoceni": {
+                    "džus": {
+                      "pocetHlasu": 1683,
+                      "sumaHodnoceni": 5836
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "nazev": "3",
+              "id": 10817,
+              "lzeObjednat": true,
+              "cenyVahy": [
+                {
+                  "id": 3493043,
+                  "cena": "40.00",
+                  "hmotnost": null
+                }
+              ],
+              "dataHodnoceni": {
+                "potrebaHlasu": 8
+              },
+              "chody": [
+                {
+                  "nazev": "Polévka",
+                  "jidlo": "Česneková",
+                  "alergeny": [
+                    "1",
+                    "3",
+                    "9"
+                  ],
+                  "hodnoceni": {
+                    "Česneková": {
+                      "pocetHlasu": 47,
+                      "sumaHodnoceni": 162
+                    }
+                  }
+                },
+                {
+                  "nazev": "Jídlo",
+                  "jidlo": "Zapečené batáty s cizrnou",
+                  "alergeny": [
+                    "3",
+                    "9"
+                  ],
+                  "hodnoceni": {
+                    "Zapečené batáty s cizrnou": {
+                      "pocetHlasu": 0
+                    }
+                  }
+                },
+                {
+                  "nazev": "Doplněk",
+                  "jidlo": "Nabídka salátového baru",
+                  "alergeny": [],
+                  "hodnoceni": {
+                    "Nabídka salátového baru": {
+                      "pocetHlasu": 517,
+                      "sumaHodnoceni": 1822
+                    }
+                  }
+                },
+                {
+                  "nazev": "Nápoj",
+                  "jidlo": "džus",
+                  "alergeny": [],
+                  "hodnoceni": {
+                    "džus": {
+                      "pocetHlasu": 1683,
+                      "sumaHodnoceni": 5836
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "od": "12:00",
+          "do": "14:30"
+        }
+      ]
+    }
+  }
+]

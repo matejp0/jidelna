@@ -6,25 +6,26 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 const URL = "https://www.jidelna.cz/rest/u/c58zbtfnjz72h6t5nzfva9uzvbag8m/"
 
 type User struct {
   userId string
-  cookies []*http.Cookie
+  client http.Client
 }
 
 
 func (u *User) GetUserInfo() string {
-  client := http.Client{}
-
   req, _ := http.NewRequest(http.MethodGet, URL + "/uzivatel/" + u.userId + "/info", nil)
-  req.AddCookie(u.cookies[1])
-  response, err := client.Do(req)
+  response, err := u.client.Do(req)
   if err != nil {
     log.Fatal(err)
   }
@@ -36,6 +37,14 @@ func (u *User) GetUserInfo() string {
 }
 
 func (u *User) Login(email, password string) () {
+  jar, err := cookiejar.New(nil)
+  if err != nil {
+    log.Fatal(err.Error())
+  }
+  u.client = http.Client{
+    Jar: jar,
+  }
+
   data := url.Values{}
   data.Add("login", email)
   data.Add("heslo", password)
@@ -61,24 +70,28 @@ func (u *User) Login(email, password string) () {
   for i := range user.Ucet.Ucty { 
     n = i
   }
-  u.cookies = httpResponse.Cookies()
+  urlObj, _ := url.Parse(URL)
+  u.client.Jar.SetCookies(urlObj, httpResponse.Cookies()[1:]) 
   u.userId = n
 }
 
-func GetFoods() {
+func (u *User) GetFoods() {
   t := time.Now()
-  httpResponse, err := http.Get(URL+"zarizeni/356/dny/od/" + t.Format("2006-01-02") + "/do/" + t.AddDate(0, 0, 1).Format("2006-01-02"))
+  req, _ := http.NewRequest(http.MethodGet, URL+"zarizeni/356/dny/od/" + t.Format("2006-01-02") + "/do/" + t.AddDate(0, 0, 2).Format("2006-01-02"), nil)
+
+  resp, err := u.client.Do(req)
+
   if err != nil {
     log.Fatal(err)
     os.Exit(1)
   }
 
-  body, err := ioutil.ReadAll(httpResponse.Body)
+  body, err := ioutil.ReadAll(resp.Body)
   if err != nil {
     log.Fatal(err)
     os.Exit(1)
   }
-  
+
   var parsedResponse []Day
 
   err = json.Unmarshal(body, &parsedResponse)
@@ -86,26 +99,37 @@ func GetFoods() {
     log.Fatal(err)
   }
 
-  PrintFoods(parsedResponse)
+  PrintFoods(parsedResponse, u)
 }
 
-func PrintFoods(days []Day) {
+func PrintFoods(days []Day, u *User) {
+  d := color.New(color.FgCyan, color.Bold)
   for _, day := range days {
     fmt.Println(day.Date)
+    
+    ucet := day.Den.CastiDne[0].Objednavky[u.userId].(map[string]any)
+    idMenu := ucet["idMenu"]
     for _, item := range day.Den.CastiDne[0].Menu {
       if item.LzeObjednat == false { continue }
-      fmt.Printf("[%v]\n", item.Nazev)
+      if strconv.Itoa(item.Id) == idMenu {
+        d = color.New(color.FgHiYellow, color.Bold)
+      } else {
+        d = color.New(color.FgHiWhite)
+      }
+
+      d.Printf("[%v]", item.Nazev)
       for _, values := range item.Chody {
         switch values.Nazev {
         case "Polévka":
-          fmt.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
+          d.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
         case "Jídlo":
-          fmt.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
+          d.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
         case "Příloha":
-          fmt.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
+          d.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
 
         }
       }
+      fmt.Println()
     }
     fmt.Println()
   }
@@ -115,9 +139,11 @@ type Day struct {
   Date string `json:"datum"`
   Den struct { 
     CastiDne []struct {
+      Objednavky map[string]any `json:"objednavky"`
       Nazev string `json:"nazev"` // "oběd" -- velice hodnotná informace
       Menu []struct {
         Nazev string `json:"nazev"`
+        Id int `json:"id"`
         LzeObjednat bool `json:"lzeObjednat"`
         Chody []struct {
           Nazev string `json:"nazev"`
@@ -130,6 +156,6 @@ type Day struct {
 
 type LogInUser struct {
   Ucet struct {
-    Ucty map[string]interface{} `json:"ucty"`
+    Ucty map[string]any `json:"ucty"`
   }
 }

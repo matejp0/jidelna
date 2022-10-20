@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,33 +9,44 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"time"
-
-	"github.com/fatih/color"
+	"strings"
 )
 
 const URL = "https://www.jidelna.cz/rest/u/c58zbtfnjz72h6t5nzfva9uzvbag8m/"
 
 type User struct {
-  userId string
+  UserId string
+  schoolId string
   client http.Client
 }
 
 
-func (u *User) GetUserInfo() string {
-  req, _ := http.NewRequest(http.MethodGet, URL + "/uzivatel/" + u.userId + "/info", nil)
+func (u *User) GetUserInfo() UserInfo {
+  req, _ := http.NewRequest(http.MethodGet, URL + "/uzivatel/" + u.UserId + "/info", nil)
   response, err := u.client.Do(req)
   if err != nil {
     log.Fatal(err)
   }
-  responseDecoded, err := ioutil.ReadAll(response.Body)
+  body, err := ioutil.ReadAll(response.Body)
   if err != nil {
     log.Fatal(err)
+    return UserInfo{}
   }
-  return string(responseDecoded)
+
+  var userInfo UserInfo
+  err = json.Unmarshal(body, &userInfo)
+  
+  if err != nil {
+    log.Fatal(err)
+    return UserInfo{}
+  }
+
+  
+
+  return userInfo
 }
 
-func (u *User) Login(email, password string) () {
+func (u *User) Login(email, password string) bool {
   jar, err := cookiejar.New(nil)
   if err != nil {
     log.Fatal(err.Error())
@@ -56,6 +66,7 @@ func (u *User) Login(email, password string) () {
   body, err := ioutil.ReadAll(httpResponse.Body)
   if err != nil {
     log.Fatal(err)
+    return false
   }
 
   var user LogInUser
@@ -63,6 +74,7 @@ func (u *User) Login(email, password string) () {
   err = json.Unmarshal(body, &user)
   if err != nil {
     log.Fatal(err)
+    return false
   }
 
   // this is stupid but it's because of the stupidity of jidelna
@@ -72,12 +84,61 @@ func (u *User) Login(email, password string) () {
   }
   urlObj, _ := url.Parse(URL)
   u.client.Jar.SetCookies(urlObj, httpResponse.Cookies()[1:]) 
-  u.userId = n
+  u.UserId = n
+  u.schoolId = user.Ucet.Ucty[n]["regc"].(string)
+
+  return true
 }
 
-func (u *User) GetFoods(days int) {
-  t := time.Now()
-  req, _ := http.NewRequest(http.MethodGet, URL+"zarizeni/356/dny/od/" + t.Format("2006-01-02") + "/do/" + t.AddDate(0, 0, days).Format("2006-01-02"), nil)
+func (u *User) EditFood(idMenu int, date string) bool {
+  food := u.createFood(idMenu, date)
+  marshalized, err := json.Marshal([1]Food{food})
+  if err != nil {
+    log.Fatal("Marshalization failed", err)
+  }
+  jsonList := make([]string, 0)
+  jsonList = append(jsonList, string(marshalized[:]))
+  urlValues := url.Values{}
+  urlValues.Set("json", string(marshalized[:]))
+  req, _ := http.NewRequest(http.MethodPost, URL + "zarizeni/" + u.schoolId + "/objednavky", strings.NewReader(urlValues.Encode()))
+  req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+  resp, err := u.client.Do(req)
+  if err != nil {
+    log.Fatal(err)
+    return false
+  }
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+  var jidelnaResponse JidelnaResponse
+  err = json.Unmarshal(body, &jidelnaResponse)
+
+  if err != nil {
+    log.Fatal(err)
+    return false
+  }
+
+  if jidelnaResponse.Stav == "ok" { 
+    return true
+  } else {
+    return false
+  }
+
+}
+
+func (u *User) createFood(idMenu int, date string) Food {
+  return Food{
+    IdUzivatele: u.UserId,
+    IdMenu: strconv.Itoa(idMenu),
+    Den: date,
+    Stav: "Prihlaseno",
+    Mnozstvi: 1,
+  }
+}
+
+func (u *User) GetFoods(startDate string, endDate string) []Day {
+  req, _ := http.NewRequest(http.MethodGet, URL+"zarizeni/" + u.schoolId + "/dny/od/" + startDate + "/do/" + endDate, nil)
 
   resp, err := u.client.Do(req)
 
@@ -99,45 +160,9 @@ func (u *User) GetFoods(days int) {
     log.Fatal(err)
   }
 
-  PrintFoods(parsedResponse, u)
+  return parsedResponse
 }
 
-func PrintFoods(days []Day, u *User) {
-  d := color.New(color.FgCyan, color.Bold)
-  dateColor := color.New(color.FgMagenta, color.Italic)
-  for _, day := range days {
-    date, _ := time.Parse("2006-01-02", day.Date)
-
-    dateColor.Println(date.Format("01. 02. 2006"))
-    
-    ucet := day.Den.CastiDne[0].Objednavky[u.userId].(map[string]any)
-    for _, item := range day.Den.CastiDne[0].Menu {
-      if item.LzeObjednat == false { continue }
-      if strconv.Itoa(item.Id) == ucet["idMenu"] && ucet["stav"] == "Prihlaseno" {
-        d = color.New(color.FgHiYellow, color.Bold)
-      } else if ucet["stav"] == "Vyzvednuto"{
-        d = color.New(color.FgHiRed)
-      } else {
-        d = color.New(color.FgHiWhite)
-      }
-
-      d.Printf("[%v]", item.Nazev)
-      for _, values := range item.Chody {
-        switch values.Nazev {
-        case "Polévka":
-          d.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
-        case "Jídlo":
-          d.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
-        case "Příloha":
-          d.Printf("\t%v: %v\n", values.Nazev, values.Jidlo)
-
-        }
-      }
-      fmt.Println()
-    }
-    fmt.Println()
-  }
-}
 
 type Day struct {
   Date string `json:"datum"`
@@ -160,6 +185,24 @@ type Day struct {
 
 type LogInUser struct {
   Ucet struct {
-    Ucty map[string]any `json:"ucty"`
+    Ucty map[string]map[string]any `json:"ucty"`
   }
+}
+
+
+type Food struct {
+  IdUzivatele string `json:"idUzivatele"`
+  IdMenu string `json:"idMenu"`
+  Den string `json:"den"`
+  Stav string `json:"stav"`
+  Mnozstvi int `json:"mnozstvi"`
+}
+
+type JidelnaResponse struct {
+  Stav string `json:"stav"`
+}
+
+type UserInfo struct {
+  Jmeno string `json:"jmeno"`
+  KontoProObjednavani string `json:"kontoProObjednavani"`
 }

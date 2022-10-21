@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -27,21 +26,15 @@ func (u *User) GetUserInfo() UserInfo {
   if err != nil {
     log.Fatal(err)
   }
-  body, err := ioutil.ReadAll(response.Body)
-  if err != nil {
-    log.Fatal(err)
-    return UserInfo{}
-  }
+  
+	defer response.Body.Close()
 
   var userInfo UserInfo
-  err = json.Unmarshal(body, &userInfo)
-  
+  err = json.NewDecoder(response.Body).Decode(&userInfo)
   if err != nil {
     log.Fatal(err)
     return UserInfo{}
   }
-
-  
 
   return userInfo
 }
@@ -58,20 +51,14 @@ func (u *User) Login(email, password string) bool {
   data := url.Values{}
   data.Add("login", email)
   data.Add("heslo", password)
-  httpResponse, err := http.PostForm(URL+"login/jmenoheslo", data)
+  resp, err := http.PostForm(URL+"login/jmenoheslo", data)
   if err != nil {
     log.Fatal("Failed to log in", err)
     os.Exit(1)
   }
-  body, err := ioutil.ReadAll(httpResponse.Body)
-  if err != nil {
-    log.Fatal(err)
-    return false
-  }
 
   var user LogInUser
-
-  err = json.Unmarshal(body, &user)
+  err = json.NewDecoder(resp.Body).Decode(&user)
   if err != nil {
     log.Fatal(err)
     return false
@@ -83,7 +70,7 @@ func (u *User) Login(email, password string) bool {
     n = i
   }
   urlObj, _ := url.Parse(URL)
-  u.client.Jar.SetCookies(urlObj, httpResponse.Cookies()[1:]) 
+  u.client.Jar.SetCookies(urlObj, resp.Cookies()[1:]) 
   u.UserId = n
   u.schoolId = user.Ucet.Ucty[n]["regc"].(string)
 
@@ -108,11 +95,11 @@ func (u *User) EditFood(idMenu int, date string) bool {
     log.Fatal(err)
     return false
   }
+
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
 
   var jidelnaResponse JidelnaResponse
-  err = json.Unmarshal(body, &jidelnaResponse)
+  err = json.NewDecoder(resp.Body).Decode(&jidelnaResponse)
 
   if err != nil {
     log.Fatal(err)
@@ -147,17 +134,14 @@ func (u *User) GetFoods(startDate string, endDate string) []Day {
     os.Exit(1)
   }
 
-  body, err := ioutil.ReadAll(resp.Body)
-  if err != nil {
-    log.Fatal(err)
-    os.Exit(1)
-  }
+	defer resp.Body.Close()
 
   var parsedResponse []Day
 
-  err = json.Unmarshal(body, &parsedResponse)
+  err = json.NewDecoder(resp.Body).Decode(&parsedResponse)
   if err != nil {
     log.Fatal(err)
+    os.Exit(1)
   }
 
   return parsedResponse

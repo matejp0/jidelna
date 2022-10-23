@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"flag"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/matejp0/jidelna/api"
+
+	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
 const DATE_J = "2006-01-02"
@@ -14,13 +20,71 @@ const DATE_H = "02. 01. 2006"
 
 func main() {
   var user api.User
-  fmt.Println(user.Login(EMAIL, PASSWORD))
-  //fmt.Println(user.EditFood(10815, "2022-10-24"))
-  t := time.Now()
-  PrintFoods(user.GetFoods(t.Format(DATE_J), t.AddDate(0, 0, 5).Format(DATE_J)), user)
+
+  user.Login(EMAIL, PASSWORD)
+
+  var (
+    listFlagSet = flag.NewFlagSet("jidelna list", flag.ExitOnError)
+    nDays = listFlagSet.Int("n", 7, "How many days to list")
+    orderFlagSet = flag.NewFlagSet("jidelna order", flag.ExitOnError)
+    date = orderFlagSet.String("d", "2022-10-20", "Date")
+  )
+
+  list := &ffcli.Command{
+    Name: "list",
+    ShortUsage: "jidelna list [-n days]",
+    ShortHelp: "Lists foods",
+    FlagSet: listFlagSet,
+    Exec: func(ctx context.Context, args []string) error {
+      t := time.Now()
+      PrintFoods(user.GetFoods(t.Format(DATE_J), t.AddDate(0, 0, *nDays).Format(DATE_J)), user)
+      return nil
+    },
+  }
+
+  info := &ffcli.Command{
+    Name: "info",
+    ShortUsage: "jidelna info",
+    ShortHelp: "Get user info",
+    Exec: func(ctx context.Context, args []string) error {
+      fmt.Println(user.GetUserInfo())
+      return nil
+    },
+  }
+
+  order := &ffcli.Command{
+    Name: "order",
+    ShortUsage: "jidelna order [-d date] <id>",
+    ShortHelp: "Order food",
+    FlagSet: orderFlagSet,
+    Exec: func(ctx context.Context, args []string) error {
+      if len(args) < 1 {
+        return errors.New("Requires exactly 1 argument")
+      }
+      num, err := strconv.Atoi(args[0])
+      if err != nil {
+        return errors.New("Failed to convert food id to int")
+      }
+      success := user.EditFood(num, *date)
+      PrintFoods(user.GetFoods(*date, *date), user)
+      if success {
+        fmt.Println("Successfully ordered")
+        return nil
+      }
+      return errors.New("Failed to edit the food")
+    },
+  }
+  root := &ffcli.Command {
+    ShortUsage: "jidelna <subcommand>",
+    Subcommands: []*ffcli.Command{list, info, order},
+  }
+
+  root.ParseAndRun(context.Background(), os.Args[1:])
+  //fmt.Println(user.EditFood(10816, "2022-11-7"))
 
     
-  fmt.Println(user.GetUserInfo())
+  //fmt.Println(user.GetUserInfo())
+  
 }
 
 

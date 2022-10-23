@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -27,7 +26,7 @@ func main() {
     listFlagSet = flag.NewFlagSet("jidelna list", flag.ExitOnError)
     nDays = listFlagSet.Int("n", 7, "How many days to list")
     orderFlagSet = flag.NewFlagSet("jidelna order", flag.ExitOnError)
-    date = orderFlagSet.String("d", "2022-10-20", "Date")
+    date = orderFlagSet.String("d", "", "Date")
   )
 
   list := &ffcli.Command{
@@ -59,19 +58,27 @@ func main() {
     FlagSet: orderFlagSet,
     Exec: func(ctx context.Context, args []string) error {
       if len(args) < 1 {
-        return errors.New("Requires exactly 1 argument")
+        return fmt.Errorf("Requires exactly 1 argument")
       }
       num, err := strconv.Atoi(args[0])
       if err != nil {
-        return errors.New("Failed to convert food id to int")
+        return fmt.Errorf("Failed to convert food id to int")
       }
+
+      if len(*date) == 0 {
+        return fmt.Errorf("You must specify the date")
+      } else {
+        fmt.Println(len(*date), *date)
+      }
+
       success := user.EditFood(num, *date)
       PrintFoods(user.GetFoods(*date, *date), user)
       if success {
         fmt.Println("Successfully ordered")
         return nil
       }
-      return errors.New("Failed to edit the food")
+      return fmt.Errorf("Failed to edit the food")
+      
     },
   }
   root := &ffcli.Command {
@@ -79,12 +86,9 @@ func main() {
     Subcommands: []*ffcli.Command{list, info, order},
   }
 
-  root.ParseAndRun(context.Background(), os.Args[1:])
-  //fmt.Println(user.EditFood(10816, "2022-11-7"))
-
-    
-  //fmt.Println(user.GetUserInfo())
-  
+  if err := root.ParseAndRun(context.Background(), os.Args[1:]); err != nil {
+    fmt.Fprintln(os.Stderr, err.Error())
+  }
 }
 
 

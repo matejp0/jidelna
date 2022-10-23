@@ -1,4 +1,5 @@
 # Simple CLI client for jidelna.cz
+This is a simple client for [Jidelna.cz](https://jidelna.cz) written in Go.
 
 ## Build
 1. Clone this repository using
